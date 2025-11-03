@@ -48,6 +48,19 @@ with st.sidebar:
     show_confidence = st.checkbox("Show Confidence Scores", value=True)
     run_robustness_test = st.checkbox("Run Robustness Suite", value=False)
 
+    st.divider()
+
+    st.header("📊 Acceptance Criteria")
+    robustness_threshold = st.slider(
+        "Minimum Robust Accuracy (%)",
+        min_value=50,
+        max_value=95,
+        value=70,
+        step=5,
+        help="Minimum accuracy required under adversarial attack to pass deployment"
+    )
+    st.caption(f"Model must maintain ≥{robustness_threshold}% accuracy under attack")
+
 # Simulated model for demonstration
 class DemoImageClassifier:
     """Simulated image classifier for demonstration"""
@@ -60,25 +73,35 @@ class DemoImageClassifier:
         """Simulate model prediction"""
         # For demo: Create deterministic but realistic predictions
         # based on image properties
-        
+
         if image_array is None:
             return None
-        
-        # Simple hash-based prediction for consistency
-        img_sum = np.sum(image_array)
-        img_mean = np.mean(image_array)
-        
-        # Generate "confidence scores"
-        base_confidences = np.random.RandomState(int(img_sum) % 1000).random(5)
-        confidences = base_confidences / base_confidences.sum()
-        
-        # Make one class dominant
-        max_idx = int(img_mean * 5) % 5
-        confidences[max_idx] = 0.7 + (confidences[max_idx] * 0.25)
-        confidences = confidences / confidences.sum()
-        
-        predicted_class = self.classes[np.argmax(confidences)]
-        
+
+        # Check if this is the generated cat image (by checking for tan/brown pixels)
+        has_cat_colors = np.any((image_array[:,:,0] == 180) &
+                                 (image_array[:,:,1] == 140) &
+                                 (image_array[:,:,2] == 100))
+
+        if has_cat_colors:
+            # This is our cat image - predict Cat with high confidence
+            confidences = np.array([0.94, 0.03, 0.01, 0.01, 0.01])  # Cat, Dog, Bird, Car, Airplane
+            predicted_class = "Cat"
+        else:
+            # For other images, use original logic
+            img_sum = np.sum(image_array)
+            img_mean = np.mean(image_array)
+
+            # Generate "confidence scores"
+            base_confidences = np.random.RandomState(int(img_sum) % 1000).random(5)
+            confidences = base_confidences / base_confidences.sum()
+
+            # Make one class dominant
+            max_idx = int(img_mean * 5) % 5
+            confidences[max_idx] = 0.7 + (confidences[max_idx] * 0.25)
+            confidences = confidences / confidences.sum()
+
+            predicted_class = self.classes[np.argmax(confidences)]
+
         return {
             "class": predicted_class,
             "confidence": float(np.max(confidences)),
@@ -89,30 +112,52 @@ class DemoImageClassifier:
         """Simulate prediction on adversarial example"""
         if image_array is None:
             return None
-        
-        # Simulate adversarial effect: confidence drops, potentially wrong class
-        img_sum = np.sum(image_array)
-        img_mean = np.mean(image_array)
-        
-        # Generate different confidences due to perturbation
-        perturbed_seed = int((img_sum + epsilon * 1000)) % 1000
-        base_confidences = np.random.RandomState(perturbed_seed).random(5)
-        confidences = base_confidences / base_confidences.sum()
-        
-        # Adversarial examples often fool the model
-        if epsilon > 0.05:  # Significant perturbation
-            # Different class becomes dominant (attack succeeds)
-            original_max = int(img_mean * 5) % 5
-            new_max = (original_max + 1) % 5  # Different class
-            confidences[new_max] = 0.6
+
+        # Check if this was originally the cat image
+        # (Note: adversarial image will have slightly different colors due to perturbation)
+        # So we check for colors in the range
+        has_cat_colors = np.any((image_array[:,:,0] >= 170) & (image_array[:,:,0] <= 190) &
+                                 (image_array[:,:,1] >= 130) & (image_array[:,:,1] <= 150) &
+                                 (image_array[:,:,2] >= 90) & (image_array[:,:,2] <= 110))
+
+        if has_cat_colors:
+            # This is our adversarial cat image
+            if epsilon >= 0.1:  # Epsilon 0.1 or higher
+                # Attack succeeds - model predicts Dog instead of Cat with 97% confidence
+                confidences = np.array([0.01, 0.97, 0.01, 0.005, 0.005])  # Cat->Dog with 97% confidence
+                predicted_class = "Dog"
+            elif epsilon >= 0.05:
+                # Moderate perturbation - might switch to Dog with lower confidence
+                confidences = np.array([0.30, 0.55, 0.08, 0.04, 0.03])
+                predicted_class = "Dog"
+            else:
+                # Small perturbation - still Cat but lower confidence
+                confidences = np.array([0.75, 0.15, 0.05, 0.03, 0.02])
+                predicted_class = "Cat"
         else:
-            # Small perturbation - might still get right class but lower confidence
-            max_idx = int(img_mean * 5) % 5
-            confidences[max_idx] = 0.5
-        
-        confidences = confidences / confidences.sum()
-        predicted_class = self.classes[np.argmax(confidences)]
-        
+            # For other images, use original logic
+            img_sum = np.sum(image_array)
+            img_mean = np.mean(image_array)
+
+            # Generate different confidences due to perturbation
+            perturbed_seed = int((img_sum + epsilon * 1000)) % 1000
+            base_confidences = np.random.RandomState(perturbed_seed).random(5)
+            confidences = base_confidences / base_confidences.sum()
+
+            # Adversarial examples often fool the model
+            if epsilon > 0.05:  # Significant perturbation
+                # Different class becomes dominant (attack succeeds)
+                original_max = int(img_mean * 5) % 5
+                new_max = (original_max + 1) % 5  # Different class
+                confidences[new_max] = 0.6
+            else:
+                # Small perturbation - might still get right class but lower confidence
+                max_idx = int(img_mean * 5) % 5
+                confidences[max_idx] = 0.5
+
+            confidences = confidences / confidences.sum()
+            predicted_class = self.classes[np.argmax(confidences)]
+
         return {
             "class": predicted_class,
             "confidence": float(np.max(confidences)),
@@ -120,19 +165,42 @@ class DemoImageClassifier:
         }
 
 def generate_sample_image():
-    """Generate a sample image for testing"""
-    # Create a simple gradient image
-    img_array = np.zeros((224, 224, 3), dtype=np.uint8)
-    
-    # Create pattern
+    """Generate a sample cat-like image for testing"""
+    # Create a simple image that resembles a cat silhouette
+    img_array = np.ones((224, 224, 3), dtype=np.uint8) * 240  # Light background
+
+    # Draw a simple cat-like shape (circle for head, triangles for ears, oval for body)
+    center_y, center_x = 112, 112
+
+    # Body (lower oval)
     for i in range(224):
         for j in range(224):
-            img_array[i, j] = [
-                int(255 * (i / 224)),
-                int(255 * (j / 224)),
-                int(128 + 127 * np.sin(i / 20))
-            ]
-    
+            # Body
+            if ((i - 140) ** 2) / 50**2 + ((j - 112) ** 2) / 40**2 < 1:
+                img_array[i, j] = [180, 140, 100]  # Brown/tan color
+
+            # Head (upper circle)
+            if (i - 80) ** 2 + (j - 112) ** 2 < 30**2:
+                img_array[i, j] = [180, 140, 100]
+
+            # Left ear (triangle)
+            if i > 45 and i < 75 and abs(j - 85) < (i - 45) * 0.6:
+                img_array[i, j] = [180, 140, 100]
+
+            # Right ear (triangle)
+            if i > 45 and i < 75 and abs(j - 139) < (i - 45) * 0.6:
+                img_array[i, j] = [180, 140, 100]
+
+            # Eyes
+            if (i - 75) ** 2 + (j - 100) ** 2 < 4**2:
+                img_array[i, j] = [0, 0, 0]  # Black
+            if (i - 75) ** 2 + (j - 124) ** 2 < 4**2:
+                img_array[i, j] = [0, 0, 0]
+
+            # Nose (small triangle)
+            if i > 85 and i < 92 and abs(j - 112) < (92 - i) * 0.5:
+                img_array[i, j] = [255, 150, 150]  # Pink
+
     return img_array
 
 def add_adversarial_perturbation(image_array, epsilon, method="FGSM"):
@@ -199,7 +267,7 @@ with tab1:
         
         # Display original
         img_pil = Image.fromarray(demo_image)
-        st.image(img_pil, use_column_width=True)
+        st.image(img_pil, use_container_width=True)
         
         # Predict on original
         original_pred = model.predict(demo_image)
@@ -228,7 +296,7 @@ with tab1:
             # Visualize perturbation
             perturbation_vis = np.abs(perturbation).astype(np.uint8)
             pert_pil = Image.fromarray(perturbation_vis)
-            st.image(pert_pil, use_column_width=True, caption="Perturbation (amplified for visibility)")
+            st.image(pert_pil, use_container_width=True, caption="Perturbation (amplified for visibility)")
             
             st.info(f"**Method:** {attack_method}")
             st.metric("Epsilon (ε)", f"{epsilon:.2f}")
@@ -242,7 +310,7 @@ with tab1:
         if 'adversarial_img' in locals():
             # Display adversarial
             adv_pil = Image.fromarray(adversarial_img)
-            st.image(adv_pil, use_column_width=True)
+            st.image(adv_pil, use_container_width=True)
             
             # Predict on adversarial
             adv_pred = model.predict_adversarial(adversarial_img, epsilon)
@@ -319,28 +387,37 @@ with tab2:
         
         for i, eps in enumerate(epsilon_values):
             status_text.text(f"Testing ε = {eps:.2f}...")
-            
-            # Simulate testing on multiple images
-            correct = 0
-            total = 20
-            
-            for _ in range(total):
-                test_img = generate_sample_image()
-                orig_pred = model.predict(test_img)
-                
-                adv_img, _ = add_adversarial_perturbation(test_img, eps, attack_method)
-                adv_pred = model.predict_adversarial(adv_img, eps)
-                
-                if orig_pred['class'] == adv_pred['class']:
-                    correct += 1
-            
-            accuracy = correct / total
+
+            # Simulate testing on multiple images with realistic robustness degradation
+            # Starting from ~94% clean accuracy, degrading to ~23% at epsilon=0.3
+            if eps <= 0.01:
+                # Very small perturbation - model mostly robust
+                accuracy = 0.94  # Clean accuracy
+            elif eps <= 0.03:
+                # Small perturbation - slight degradation
+                accuracy = 0.89
+            elif eps <= 0.05:
+                # Moderate perturbation - noticeable degradation
+                accuracy = 0.76
+            elif eps <= 0.1:
+                # Significant perturbation - major degradation
+                accuracy = 0.58
+            elif eps <= 0.15:
+                # Strong perturbation - severe degradation
+                accuracy = 0.43
+            elif eps <= 0.2:
+                # Very strong perturbation - critical degradation
+                accuracy = 0.31
+            else:  # eps >= 0.3
+                # Maximum perturbation - near complete failure
+                accuracy = 0.23
+
             results.append({
                 "Epsilon": eps,
                 "Accuracy": accuracy,
                 "Attack Success Rate": 1 - accuracy
             })
-            
+
             progress_bar.progress((i + 1) / len(epsilon_values))
         
         status_text.text("Test complete!")
@@ -377,32 +454,31 @@ with tab2:
         # Verdict
         st.divider()
         st.subheader("🎯 Robustness Assessment")
-        
-        if robust_acc >= 0.7:
+
+        threshold_decimal = robustness_threshold / 100
+        meets_threshold = robust_acc >= threshold_decimal
+
+        if meets_threshold:
             st.success(f"""
-            ✅ **Model is relatively robust**
-            
-            - Maintains {robust_acc:.1%} accuracy under strong adversarial attack (ε={epsilon_values[-1]})
+            ✅ **Model PASSES robustness requirements**
+
+            - Clean accuracy: {clean_acc:.1%}
+            - Robust accuracy: {robust_acc:.1%} under attack (ε={epsilon_values[-1]})
             - Performance degradation: {degradation:.1%}
-            - Meets typical robustness threshold of 70%
-            """)
-        elif robust_acc >= 0.5:
-            st.warning(f"""
-            ⚠️ **Model has moderate robustness**
-            
-            - Accuracy drops to {robust_acc:.1%} under attack (ε={epsilon_values[-1]})
-            - Performance degradation: {degradation:.1%}
-            - Below recommended threshold of 70%
-            - **Recommendation:** Implement adversarial training
+            - **Verdict:** Meets acceptance threshold of {robustness_threshold}%
+            - Model is approved for deployment
             """)
         else:
             st.error(f"""
-            🚨 **Model is vulnerable to adversarial attacks**
-            
-            - Accuracy drops to {robust_acc:.1%} under attack (ε={epsilon_values[-1]})
+            🚨 **Model FAILS robustness requirements**
+
+            - Clean accuracy: {clean_acc:.1%}
+            - Robust accuracy: {robust_acc:.1%} under attack (ε={epsilon_values[-1]})
             - Performance degradation: {degradation:.1%}
-            - **Critical:** Model fails basic robustness requirements
-            - **Action Required:** Do not deploy - implement adversarial training
+            - **Required threshold:** {robustness_threshold}%
+            - **Gap:** {(threshold_decimal - robust_acc):.1%} below requirement
+            - **Verdict:** BLOCKED - Do not deploy
+            - **Action Required:** Implement adversarial training before deployment
             """)
 
 with tab3:

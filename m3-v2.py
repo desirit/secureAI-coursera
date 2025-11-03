@@ -37,7 +37,17 @@ with st.sidebar:
     threshold_adversarial = st.slider("Adversarial Accuracy (%)", 0, 100, 75)
     threshold_vulnerabilities = st.selectbox(
         "Max Vulnerability Severity",
-        ["None", "Low", "Medium", "High", "Critical"]
+        ["None", "Low", "Medium", "High", "Critical"],
+        index=2  # Default to "Medium"
+    )
+
+    st.divider()
+
+    st.subheader("Demo Scenarios")
+    demo_scenario = st.radio(
+        "Select Scenario",
+        ["All Pass (Success)", "Single Failure", "Multiple Failures", "Custom"],
+        help="Choose a pre-configured scenario or customize gate behavior"
     )
     
     st.divider()
@@ -80,25 +90,37 @@ class SecurityGate:
 
 # Simulate a model deployment
 class AIModelDeployment:
-    def __init__(self):
+    def __init__(self, scenario="All Pass (Success)"):
         self.commit_id = f"abc{random.randint(1000, 9999)}"
         self.model_version = "v2.3.1"
         self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        # Simulated test results
+        self.scenario = scenario
+
+        # Configure results based on scenario
+        if scenario == "All Pass (Success)":
+            self._configure_all_pass()
+        elif scenario == "Single Failure":
+            self._configure_single_failure()
+        elif scenario == "Multiple Failures":
+            self._configure_multiple_failures()
+        else:  # Custom
+            self._configure_all_pass()
+
+    def _configure_all_pass(self):
+        """All gates pass"""
         self.unit_test_results = {
             "total": 150,
             "passed": 143,
             "failed": 7,
             "pass_rate": 95.3
         }
-        
+
         self.adversarial_results = {
             "clean_accuracy": 94.5,
             "adversarial_accuracy": 76.2,
             "robustness_score": 80.7
         }
-        
+
         self.dependency_scan = {
             "total_packages": 47,
             "vulnerabilities": {
@@ -108,26 +130,101 @@ class AIModelDeployment:
                 "low": 5
             }
         }
-        
+
         self.static_analysis = {
             "files_scanned": 23,
             "issues_found": {
-                "security": 1,
+                "security": 0,  # No security issues
                 "quality": 8,
                 "maintainability": 3
             }
         }
-        
+
         self.data_leakage_test = {
             "queries_tested": 1000,
             "leaks_detected": 0,
             "pass_rate": 100.0
         }
-        
+
         self.model_extraction_test = {
             "queries_simulated": 10000,
             "extraction_detected": True,
             "resistance_score": 92.0
+        }
+
+    def _configure_single_failure(self):
+        """Static analysis fails"""
+        self._configure_all_pass()
+        self.static_analysis = {
+            "files_scanned": 23,
+            "issues_found": {
+                "security": 3,  # Security issues found!
+                "quality": 8,
+                "maintainability": 3
+            },
+            "security_details": [
+                "Hardcoded API key in config.py:42",
+                "SQL injection vulnerability in query.py:78",
+                "Unsafe pickle.load() in model_loader.py:15"
+            ]
+        }
+
+    def _configure_multiple_failures(self):
+        """Multiple gates fail"""
+        self.unit_test_results = {
+            "total": 150,
+            "passed": 135,
+            "failed": 15,
+            "pass_rate": 90.0,  # Below 95% threshold
+            "failed_tests": [
+                "test_prompt_injection_defense",
+                "test_authentication_bypass",
+                "test_rate_limiting"
+            ]
+        }
+
+        self.adversarial_results = {
+            "clean_accuracy": 94.5,
+            "adversarial_accuracy": 68.3,  # Below 75% threshold
+            "robustness_score": 72.4,
+            "failed_attacks": ["PGD", "C&W"]
+        }
+
+        self.dependency_scan = {
+            "total_packages": 47,
+            "vulnerabilities": {
+                "critical": 0,
+                "high": 0,
+                "medium": 2,
+                "low": 5
+            }
+        }
+
+        self.static_analysis = {
+            "files_scanned": 23,
+            "issues_found": {
+                "security": 0,
+                "quality": 8,
+                "maintainability": 3
+            }
+        }
+
+        self.data_leakage_test = {
+            "queries_tested": 1000,
+            "leaks_detected": 3,  # Data leaks found!
+            "pass_rate": 99.7,
+            "leak_examples": [
+                "Customer email exposed in query response",
+                "Training data memorization detected",
+                "PII in error messages"
+            ]
+        }
+
+        self.model_extraction_test = {
+            "queries_simulated": 10000,
+            "extraction_detected": False,  # No protection!
+            "resistance_score": 45.0,
+            "issues": "Rate limiting not configured, query monitoring disabled"
         }
 
 # Main content
@@ -140,18 +237,30 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 with tab1:
     st.header("CI/CD Pipeline Execution")
-    
+
     st.write(f"""
     This simulates a complete CI/CD pipeline with security gates for AI model deployment.
-    Each gate must pass before proceeding to the next stage.
+    All gates execute regardless of individual failures, giving you a complete security assessment.
     """)
+
+    # Show scenario info
+    if 'deployment' in st.session_state and st.session_state.deployment:
+        scenario = st.session_state.deployment.scenario
+        if scenario == "All Pass (Success)":
+            st.success("📋 **Scenario:** All Pass (Success) - All security gates will pass")
+        elif scenario == "Single Failure":
+            st.warning("📋 **Scenario:** Single Failure - Static Code Analysis will fail")
+        elif scenario == "Multiple Failures":
+            st.error("📋 **Scenario:** Multiple Failures - Unit Tests, Adversarial Robustness, Data Leakage, and Model Extraction will fail")
+        else:
+            st.info("📋 **Scenario:** Custom - Results based on sidebar thresholds")
     
     # Deployment info
     if 'deployment' not in st.session_state:
         st.session_state.deployment = None
     
     if st.button("▶️ Start Deployment", type="primary", use_container_width=True):
-        st.session_state.deployment = AIModelDeployment()
+        st.session_state.deployment = AIModelDeployment(demo_scenario)
         st.session_state.pipeline_results = []
         st.session_state.pipeline_status = "running"
     
@@ -215,28 +324,28 @@ with tab1:
                 progress_bar.progress(current_gate / total_gates)
             
             # Gate 2: Static Code Analysis
-            if gate_static and all_passed:
+            if gate_static:
                 current_gate += 1
                 gate = SecurityGate("Static Code Analysis", "Analyzing code for security issues")
                 status_text.info(f"🔍 {gate.name}...")
-                
+
                 # Check for security issues
                 has_security_issues = deployment.static_analysis["issues_found"]["security"] > 0
                 should_pass = not has_security_issues
-                
+
                 result = gate.run(should_pass)
                 gate.details = deployment.static_analysis
                 gates.append(gate)
-                
+
                 if result == "failed":
                     all_passed = False
                     status_text.error(f"❌ {gate.name} FAILED")
                     time.sleep(1)
-                
+
                 progress_bar.progress(current_gate / total_gates)
-            
+
             # Gate 3: Security Unit Tests
-            if gate_unit_tests and all_passed:
+            if gate_unit_tests:
                 current_gate += 1
                 gate = SecurityGate("Security Unit Tests", "Running AI security test suite")
                 status_text.info(f"🔍 {gate.name}...")
@@ -254,43 +363,43 @@ with tab1:
                 progress_bar.progress(current_gate / total_gates)
             
             # Gate 4: Adversarial Robustness
-            if gate_adversarial and all_passed:
+            if gate_adversarial:
                 current_gate += 1
                 gate = SecurityGate("Adversarial Robustness", "Testing model against adversarial examples")
                 status_text.info(f"🔍 {gate.name}...")
-                
+
                 meets_threshold = deployment.adversarial_results["adversarial_accuracy"] >= threshold_adversarial
                 result = gate.run(meets_threshold)
                 gate.details = deployment.adversarial_results
                 gates.append(gate)
-                
+
                 if result == "failed":
                     all_passed = False
                     status_text.error(f"❌ {gate.name} FAILED")
                     time.sleep(1)
-                
+
                 progress_bar.progress(current_gate / total_gates)
-            
+
             # Gate 5: Data Leakage Prevention
-            if gate_data_leak and all_passed:
+            if gate_data_leak:
                 current_gate += 1
                 gate = SecurityGate("Data Leakage Prevention", "Testing for sensitive data exposure")
                 status_text.info(f"🔍 {gate.name}...")
-                
+
                 no_leaks = deployment.data_leakage_test["leaks_detected"] == 0
                 result = gate.run(no_leaks)
                 gate.details = deployment.data_leakage_test
                 gates.append(gate)
-                
+
                 if result == "failed":
                     all_passed = False
                     status_text.error(f"❌ {gate.name} FAILED")
                     time.sleep(1)
-                
+
                 progress_bar.progress(current_gate / total_gates)
-            
+
             # Gate 6: Model Extraction Resistance
-            if gate_model_extract and all_passed:
+            if gate_model_extract:
                 current_gate += 1
                 gate = SecurityGate("Model Extraction Resistance", "Testing resistance to model theft")
                 status_text.info(f"🔍 {gate.name}...")
@@ -318,38 +427,65 @@ with tab1:
         elif st.session_state.pipeline_status == "passed":
             st.success("✅ **All Security Gates Passed!**")
             st.balloons()
-            
+
+            # Show summary
+            total_gates = len(st.session_state.pipeline_results)
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total Gates", total_gates)
+            with col2:
+                st.metric("Passed", total_gates, delta="100%")
+            with col3:
+                st.metric("Failed", 0)
+
+            st.divider()
+
             st.write("""
             **Deployment Status:** APPROVED ✓
-            
+
             All security validations completed successfully.
             Model is ready for production deployment.
             """)
-            
+
             if st.button("🚀 Deploy to Production"):
                 st.success("🎉 Model deployed successfully!")
         
         elif st.session_state.pipeline_status == "failed":
-            st.error("❌ **Security Gate Failed - Deployment Blocked**")
-            
-            st.write("""
+            st.error("❌ **Security Gates Failed - Deployment Blocked**")
+
+            # Count failures
+            failed_gates = [gate for gate in st.session_state.pipeline_results if gate.status == "failed"]
+            passed_gates = [gate for gate in st.session_state.pipeline_results if gate.status == "passed"]
+            total_gates = len(st.session_state.pipeline_results)
+
+            # Show metrics
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total Gates", total_gates)
+            with col2:
+                st.metric("Passed", len(passed_gates))
+            with col3:
+                st.metric("Failed", len(failed_gates), delta=f"-{len(failed_gates)}", delta_color="inverse")
+
+            st.divider()
+
+            st.write(f"""
             **Deployment Status:** REJECTED ✗
-            
-            One or more security gates failed.
-            Fix the issues and re-run the pipeline.
+
+            Fix the failed gates and re-run the pipeline.
             """)
-            
-            # Show which gate failed
-            for gate in st.session_state.pipeline_results:
-                if gate.status == "failed":
-                    st.error(f"""
-                    **Failed Gate:** {gate.name}
-                    
-                    {gate.description}
-                    
-                    Review the details in the Gate Results tab.
-                    """)
-                    break
+
+            # Show all failed gates
+            st.subheader("Failed Gates:")
+            for gate in failed_gates:
+                with st.expander(f"❌ {gate.name}", expanded=True):
+                    st.write(f"**Description:** {gate.description}")
+                    st.write(f"**Status:** FAILED")
+                    st.divider()
+                    st.write("**Details:**")
+                    st.json(gate.details)
+
+            st.info("💡 Review detailed results in the 'Gate Results' tab")
 
 with tab2:
     st.header("Security Gate Definitions")
