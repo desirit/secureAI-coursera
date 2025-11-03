@@ -1,0 +1,80 @@
+groups:
+  - name: ai_security_alerts
+    interval: 30s
+    rules:
+      # High query rate alert
+      - alert: HighQueryRate
+        expr: rate(ai_query_total[5m]) > 100
+        for: 2m
+        labels:
+          severity: warning
+          category: model_extraction
+        annotations:
+          summary: "High query rate detected"
+          description: "Query rate is {{ $value }} queries/min (threshold: 100)"
+
+      # Authentication failure alert
+      - alert: AuthenticationFailures
+        expr: rate(ai_auth_failures_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: critical
+          category: authentication
+        annotations:
+          summary: "Multiple authentication failures"
+          description: "{{ $value }} auth failures in 5 minutes"
+
+      # Model accuracy drop alert
+      - alert: ModelAccuracyDrop
+        expr: ai_model_accuracy < 0.85
+        for: 5m
+        labels:
+          severity: high
+          category: model_performance
+        annotations:
+          summary: "Model accuracy dropped"
+          description: "Current accuracy: {{ $value }}"
+
+      # Prompt injection attempts
+      - alert: PromptInjectionAttempts
+        expr: rate(ai_prompt_injection_attempts_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: high
+          category: prompt_injection
+        annotations:
+          summary: "Prompt injection attempts detected"
+          description: "{{ $value }} attempts in 5 minutes"
+
+      # Adversarial inputs detected
+      - alert: AdversarialInputsDetected
+        expr: rate(ai_adversarial_detected_total[5m]) > 3
+        for: 3m
+        labels:
+          severity: medium
+          category: adversarial_attack
+        annotations:
+          summary: "Adversarial inputs detected"
+          description: "{{ $value }} adversarial inputs detected"
+
+      # Data leakage event
+      - alert: DataLeakageEvent
+        expr: ai_data_leakage_events_total > 0
+        for: 30s
+        labels:
+          severity: critical
+          category: data_leakage
+        annotations:
+          summary: "Data leakage detected!"
+          description: "Immediate investigation required"
+
+      # High response time
+      - alert: HighResponseTime
+        expr: ai_response_time_seconds > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High response time"
+          description: "Average response time: {{ $value }}s"

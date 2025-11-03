@@ -1,0 +1,32 @@
+# SecureAI Course - Demo Requirements
+# Python 3.8+ required
+
+# Core Framework
+streamlit>=1.28.0
+
+# HTTP Requests (for Ollama integration)
+requests>=2.31.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualization
+plotly>=5.17.0
+
+# Image Processing (for adversarial testing)
+Pillow>=10.0.0
+
+# Optional: For actual adversarial testing with ART library
+# Uncomment if you want to use real ART implementation in m2-v3.py
+# adversarial-robustness-toolbox>=1.15.0
+# tensorflow>=2.13.0
+# torch>=2.0.0
+
+# Optional: For monitoring metrics (if extending m3-v3.py)
+# prometheus-client>=0.17.0
+
+# Development Tools (optional)
+# pytest>=7.4.0
+# black>=23.0.0
+# flake8>=6.0.0

@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'secureai-monitor'
+
+# Scrape configurations
+scrape_configs:
+  # Scrape Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Scrape AI system metrics
+  - job_name: 'ai-system-metrics'
+    static_configs:
+      - targets: ['metrics-exporter:8000']
+    scrape_interval: 5s
+    metrics_path: /metrics
+
+# Alerting rules
+rule_files:
+  - 'alerts.yml'
