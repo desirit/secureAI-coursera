@@ -1,389 +1,330 @@
-# SecureAI Course - Screen Share Demo Files
+# SecureAI: Threat Model & Test Endpoints
 
-Complete set of Streamlit demonstrations for the SecureAI: Threat Model & Test Endpoints course.
+Welcome to the course repository! This contains all the interactive demonstrations and monitoring tools you'll use throughout the course.
 
-## 📦 Package Contents
+## 🎯 What's Inside
+
+This repository includes hands-on demos for learning AI security concepts:
 
 ### Module 1: Understanding AI-Specific Threat Models
-- **m1-v2-1.py** - Prompt Injection Attack Demo
-- **m1-v2-2.py** - Model Extraction Pattern Demo
-- **m1-v3-1.py** - STRIDE Threat Modeling
-- **m1-v3-2.py** - MITRE ATLAS Framework
+- **Prompt Injection Attacks** - See how attackers manipulate AI responses
+- **Model Extraction** - Understand how models can be stolen
+- **STRIDE Threat Modeling** - Apply systematic threat analysis to AI systems
+- **MITRE ATLAS Framework** - Explore real-world AI attack patterns
 
 ### Module 2: Creating Security Test Cases
-- **m2-v2.py** - Integration Testing Demo
-- **m2-v3.py** - Adversarial Testing with ART
+- **Integration Testing** - Test security across AI pipeline components
+- **Adversarial Testing** - Generate adversarial examples and test model robustness
 
-### Module 3: CI/CD Integration
-- **m3-v2.py** - CI/CD Security Gates
-- **m3-v3.py** - Continuous Monitoring Dashboard
+### Module 3: CI/CD Integration & Monitoring
+- **CI/CD Security Gates** - Automate security checks in deployment pipelines
+- **Continuous Monitoring** - Real-time monitoring with Prometheus and Grafana
 
-## 🚀 Quick Start
+## 🚀 Getting Started
 
 ### Prerequisites
 
+You'll need:
+1. **Python 3.8 or higher** - [Download Python](https://www.python.org/downloads/)
+2. **Ollama** - For running local AI models - [Install Ollama](https://ollama.ai)
+
+### Step 1: Install Ollama and Model
+
 ```bash
-# 1. Install Python 3.8+
-python --version
+# Install Ollama from https://ollama.ai
 
-# 2. Install Ollama (for AI demos)
-# Visit: https://ollama.ai
-
-# 3. Pull uncensored model
+# Pull the uncensored model (needed for security demos)
 ollama pull llama2-uncensored
 
-# 4. Start Ollama service
+# Start Ollama service
 ollama serve
 ```
 
-### Installation
+Keep this terminal window open while running demos.
 
-**Option 1: Automated Setup (Recommended)**
+### Step 2: Set Up Python Environment
+
+**Option A: Automated Setup (Recommended)**
 
 ```bash
-# Linux/Mac
+# On Linux/Mac:
 chmod +x setup.sh
 ./setup.sh
 
-# Windows
+# On Windows:
 setup.bat
 ```
 
-**Option 2: Manual Setup**
+**Option B: Manual Setup**
 
 ```bash
 # 1. Create virtual environment
 python3 -m venv venv
 
-# 2. Activate virtual environment
-# Linux/Mac:
+# 2. Activate it
+# On Linux/Mac:
 source venv/bin/activate
-# Windows:
+# On Windows:
 venv\Scripts\activate
 
-# 3. Upgrade pip
-pip install --upgrade pip
-
-# 4. Install all dependencies
+# 3. Install dependencies
 pip install -r requirements.txt
 ```
 
-**Option 3: Quick Install (without venv)**
+### Step 3: Run Your First Demo
 
 ```bash
-pip install streamlit requests pandas numpy plotly pillow
-```
-
-### Running Demos
-
-```bash
-# Run any demo
+# Start any demo (example: Prompt Injection)
 streamlit run m1-v2-1.py
 
-# Run with custom port
-streamlit run m1-v2-1.py --server.port 8502
-
-# Run in fullscreen mode for recording
-# Press F11 in browser after launching
+# Your browser will open automatically at http://localhost:8501
 ```
 
-## 📚 Demo Descriptions
+## 📚 Demo Guide
 
-### Module 1 - Video 2 - Part 1: Prompt Injection (m1-v2-1.py)
+### Module 1 Demos
 
-**What it demonstrates:**
-- Normal query vs. direct attack vs. social engineering
-- Why traditional security tools miss prompt injection
-- Real-time attack execution with llama2-uncensored
-- Data leakage detection and analysis
+#### m1-v2-1.py: Prompt Injection Attack
+**What you'll learn:**
+- How prompt injection bypasses AI safety measures
+- Different attack techniques (direct, social engineering)
+- Why traditional security tools miss these attacks
 
-**Key Features:**
-- Pre-defined attack scenarios
-- Custom query input
-- Security analysis of responses
-- Educational content about prompt injection
+**How to use:**
+1. Read the system prompt in the sidebar
+2. Try the "Normal Query" button - see safe behavior
+3. Click "Direct Attack" - see how AI instructions are bypassed
+4. Try "Social Engineering" - see a more sophisticated attack
+5. Review the security analysis showing data leakage
 
-**Usage Tips for Recording:**
-- Use preset attack buttons for consistent demonstrations
-- Show the system prompt in sidebar to explain vulnerability
-- Highlight the security analysis section showing data leakage
+#### m1-v2-2.py: Model Extraction
+**What you'll learn:**
+- How attackers systematically query models to steal them
+- Visual patterns that indicate model extraction attempts
+- Economic impact of model theft
 
-### Module 1 - Video 2 - Part 2: Model Extraction (m1-v2-2.py)
+**How to use:**
+1. Start with normal traffic simulation
+2. Enable "Simulate Attacker" checkbox
+3. Watch the different patterns emerge
+4. Review the statistics and cost analysis
 
-**What it demonstrates:**
-- Normal user traffic vs. systematic attacker patterns
-- Visual comparison of query patterns
-- Attack economics (cost vs. model value)
-- Statistical anomaly detection
+#### m1-v3-1.py: STRIDE Threat Modeling
+**What you'll learn:**
+- Apply STRIDE framework to AI systems
+- Identify threats across six categories
+- Assess and prioritize security risks
 
-**Key Features:**
-- Live traffic simulation
-- Pattern visualization with Plotly
-- Attack signature detection
-- Economic impact analysis
+**How to use:**
+1. Select a system type (or describe your own)
+2. Work through each STRIDE category
+3. Document threats you identify
+4. Review the risk assessment and export report
 
-**Usage Tips for Recording:**
-- Start with normal traffic only, then enable attacker
-- Use "Slow (Demo)" speed for clear visualization
-- Emphasize the systematic variations pattern
-- Show the cost analysis (pennies to steal millions)
+#### m1-v3-2.py: MITRE ATLAS Framework
+**What you'll learn:**
+- Comprehensive AI attack lifecycle
+- Real-world case studies (Tay, Tesla autopilot, GPT-3)
+- Mapping attacks to tactics and techniques
 
-### Module 1 - Video 3 - Part 1: STRIDE (m1-v3-1.py)
+**How to use:**
+1. Explore the "Attack Lifecycle Overview"
+2. Deep dive into specific tactics
+3. Read case studies to see real applications
+4. Analyze your own system for vulnerabilities
 
-**What it demonstrates:**
-- STRIDE framework applied to AI systems
-- Interactive threat modeling
-- Risk assessment and prioritization
-- Comprehensive report generation
+### Module 2 Demos
 
-**Key Features:**
-- Pre-configured AI system examples
-- Six STRIDE categories with AI-specific threats
-- Risk scoring calculator
-- JSON export for threat models
+#### m2-v2.py: Integration Testing
+**What you'll learn:**
+- How vulnerabilities span multiple components
+- Testing entire AI pipelines, not just models
+- Detection of complex attack chains
 
-**Usage Tips for Recording:**
-- Use "Medical Diagnostic AI" as example system
-- Document at least 2-3 threats per STRIDE category
-- Show risk assessment with scoring
-- Export final report
+**How to use:**
+1. Review the pipeline architecture diagram
+2. Run pre-defined test scenarios
+3. Watch how attacks exploit component interactions
+4. Review security analysis for each test
 
-### Module 1 - Video 3 - Part 2: MITRE ATLAS (m1-v3-2.py)
+#### m2-v3.py: Adversarial Testing with ART
+**What you'll learn:**
+- Generate adversarial examples against real models
+- Test model robustness with various attacks
+- Understand model vulnerabilities
 
-**What it demonstrates:**
-- MITRE ATLAS attack lifecycle
-- Real-world case studies
-- Tactic-to-technique mapping
-- Attack chain visualization
+**How to use:**
+1. Select an attack type (FGSM, PGD, etc.)
+2. Choose target images from MNIST dataset
+3. Generate adversarial examples
+4. Compare original vs adversarial predictions
+5. Review attack success rates
 
-**Key Features:**
-- Complete ATLAS taxonomy
-- Interactive tactic explorer
-- Real-world case studies (Tay, Tesla, GPT-3)
-- System-specific threat mapping
+### Module 3 Demos
 
-**Usage Tips for Recording:**
-- Start with "Attack Lifecycle" view for overview
-- Deep dive into 2-3 tactics
-- Show at least one case study
-- Demonstrate "Your System Analysis" with custom system
+#### m3-v2.py: CI/CD Security Gates
+**What you'll learn:**
+- Automate security testing in deployment pipelines
+- Configure quality gates and thresholds
+- Interpret security scan results
 
-### Module 2 - Video 2: Integration Testing (m2-v2.py)
+**How to use:**
+1. Configure security thresholds for your needs
+2. Run simulated CI/CD pipeline
+3. Review security scan results
+4. See how gates block vulnerable deployments
 
-**What it demonstrates:**
-- End-to-end pipeline security testing
-- Component interaction vulnerabilities
-- Attack chain execution
-- Security issue detection
+#### m3-v3.py: Continuous Monitoring Dashboard
+**What you'll learn:**
+- Monitor AI systems in production
+- Detect anomalies and security events in real-time
+- Configure alerts for security incidents
 
-**Key Features:**
-- Simulated AI pipeline (Auth → Preprocess → Model → Postprocess)
-- Six pre-defined test scenarios
-- Real-time test execution visualization
-- Security analysis with issue detection
+**How to use:**
+1. Start the monitoring stack (see below)
+2. Run the Streamlit dashboard
+3. Watch real-time metrics
+4. Simulate attacks to see detection
 
-**Usage Tips for Recording:**
-- Run tests in order: legitimate → simple attacks → complex attacks
-- Use "Slow (Demo)" mode for clear visualization
-- Emphasize the encoding attack (Test 4)
-- Show how attacks exploit component interactions
-
-## 🎬 Recording Tips
-
-### General Setup
-
+**Monitoring Stack Setup:**
 ```bash
-# 1. Start Ollama
-ollama serve
+cd monitoring-stack
+docker compose up -d
 
-# 2. Open demo in browser
-streamlit run filename.py
-
-# 3. Press F11 for fullscreen
-# 4. Hide browser bookmarks bar
-# 5. Zoom to 100% or 125% for visibility
+# Access tools:
+# Grafana: http://localhost:3000 (admin / secureai123)
+# Prometheus: http://localhost:9090
+# Metrics: http://localhost:8004/metrics
 ```
 
-### Best Practices
+## 🔧 Troubleshooting
 
-1. **Before Recording:**
-   - Test demo completely
-   - Prepare talking points
-   - Clear browser cache
-   - Close unnecessary tabs
+### Ollama Issues
 
-2. **During Recording:**
-   - Speak while actions execute
-   - Point out key features
-   - Explain what's happening in real-time
-   - Use preset buttons for consistency
-
-3. **Screen Share Tips:**
-   - Use high contrast themes
-   - Increase font size if needed
-   - Highlight cursor for visibility
-   - Use "Slow (Demo)" mode when available
-
-### Demo Script Templates
-
-**For m1-v2-1.py (Prompt Injection):**
-```
-1. "Here's our AI customer service chatbot with security instructions..."
-2. "Let's try a normal query first..." [Click Normal Query]
-3. "Perfect response. Now watch what happens with a direct attack..." [Click Direct Attack]
-4. "It just complied! But here's the clever approach..." [Click Social Engineering]
-5. "Notice how it leaked customer data? That's prompt injection."
-```
-
-**For m1-v2-2.py (Model Extraction):**
-```
-1. "This shows normal user traffic patterns..." [Point to left chart]
-2. "Now let's enable the attacker simulation..." [Enable checkbox]
-3. "See the difference? Systematic, high-volume queries..."
-4. "The attacker is testing variations to learn the model..."
-5. "Look at the economics - pennies to steal millions in IP..."
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Ollama Connection Error:**
+**Problem:** "Connection refused" or "Model not found"
 ```bash
 # Check if Ollama is running
 curl http://localhost:11434/api/tags
 
-# If not, start it
+# If not running, start it
 ollama serve
-```
 
-**Model Not Found:**
-```bash
-# Pull the model
-ollama pull llama2-uncensored
-
-# Verify it's installed
+# Verify model is installed
 ollama list
+
+# If model missing, pull it
+ollama pull llama2-uncensored
 ```
 
-**Streamlit Port Conflict:**
+### Python/Streamlit Issues
+
+**Problem:** Port already in use
 ```bash
-# Use different port
-streamlit run demo.py --server.port 8502
+# Use a different port
+streamlit run m1-v2-1.py --server.port 8502
 ```
 
-**Import Errors:**
+**Problem:** Missing dependencies
 ```bash
-# Reinstall dependencies
-pip install --upgrade streamlit requests pandas numpy plotly
+# Reinstall all requirements
+pip install -r requirements.txt
 
-# For adversarial demos
-pip install adversarial-robustness-toolbox tensorflow
+# Or install individually:
+pip install streamlit requests pandas numpy plotly
 ```
 
-### Performance Issues
+### Docker Issues
 
-If demos run slowly:
-1. Close other applications
-2. Use "Fast" simulation speed
-3. Reduce number of data points in visualizations
-4. Check system resources (CPU/RAM)
+**Problem:** Port conflicts in monitoring stack
+```bash
+# Check what's using the ports
+netstat -tuln | grep -E ':(3000|8004|9090)'
 
-## 📊 Dependencies by Demo
-
-### All Demos
-```
-streamlit>=1.28.0
-requests>=2.31.0
-pandas>=2.0.0
+# Stop conflicting services or edit docker-compose.yml ports
 ```
 
-### Visualization Demos (m1-v2-2, m1-v3-*)
+## 📖 Learning Path
+
+We recommend this sequence:
+
+1. **Start with Module 1** - Understand the threats
+   - Run m1-v2-1.py to see prompt injection
+   - Run m1-v2-2.py to understand model extraction
+   - Complete threat modeling with m1-v3-*.py
+
+2. **Move to Module 2** - Learn testing techniques
+   - Practice integration testing with m2-v2.py
+   - Generate adversarial examples with m2-v3.py
+
+3. **Finish with Module 3** - Implement security at scale
+   - Set up CI/CD gates with m3-v2.py
+   - Deploy monitoring with m3-v3.py
+
+## 🔒 Important Security Notes
+
+⚠️ **For Educational Use Only**
+
+- These demos intentionally contain vulnerabilities for learning
+- The `llama2-uncensored` model lacks safety guardrails by design
+- **Never** deploy these demos to production
+- **Never** expose these demos to the public internet
+- Only run in safe, isolated learning environments
+
+## 💡 Tips for Success
+
+1. **Run demos alongside course videos** - Pause videos and try the demos yourself
+2. **Experiment with inputs** - Don't just use preset buttons, try your own queries
+3. **Read the code** - All demos are well-commented, learn from the implementations
+4. **Take notes** - Document interesting findings in your own threat models
+5. **Join discussions** - Share your discoveries in course forums
+
+## 📦 What's Included
+
 ```
-plotly>=5.17.0
-numpy>=1.24.0
+secureAI-coursera/
+├── m1-v2-1.py              # Prompt injection demo
+├── m1-v2-2.py              # Model extraction demo
+├── m1-v3-1.py              # STRIDE threat modeling
+├── m1-v3-2.py              # MITRE ATLAS framework
+├── m2-v2.py                # Integration testing
+├── m2-v3.py                # Adversarial testing
+├── m3-v2.py                # CI/CD security gates
+├── m3-v3.py                # Monitoring dashboard
+├── monitoring-stack/       # Prometheus + Grafana setup
+│   ├── docker-compose.yml
+│   ├── prometheus.yml
+│   ├── alerts.yml
+│   └── grafana/           # Dashboard configs
+├── requirements.txt        # Python dependencies
+├── setup.sh               # Linux/Mac setup script
+└── setup.bat              # Windows setup script
 ```
-
-### Adversarial Testing (m2-v3)
-```
-adversarial-robustness-toolbox>=1.15.0
-tensorflow>=2.13.0
-pillow>=10.0.0
-```
-
-### Monitoring (m3-v3)
-```
-prometheus-client>=0.17.0
-```
-
-## 🔒 Security Notes
-
-⚠️ **IMPORTANT**: These demos are for **educational purposes only**.
-
-- Uses intentionally vulnerable configurations
-- llama2-uncensored model lacks safety guardrails
-- Do NOT use in production environments
-- Do NOT expose demos to public internet
-
-## 📝 Customization
-
-### Changing Models
-
-Edit the model name in demo files:
-```python
-# In m1-v2-1.py
-MODEL_NAME = "llama2-uncensored"  # Change to your model
-```
-
-Available models:
-- `llama2-uncensored` (recommended for demos)
-- `mistral`
-- `dolphin-llama2`
-
-### Adjusting Vulnerabilities
-
-In m2-v2.py, toggle vulnerabilities:
-```python
-self.vulnerabilities = {
-    "weak_auth": True,  # Change to False to fix
-    "decode_no_sanitize": True,
-    "error_verbose": True,
-    "no_output_filter": True
-}
-```
-
-### Custom System Configurations
-
-In m1-v3-1.py, add your own system:
-```python
-SYSTEM_CONFIGS = {
-    "Your Custom System": {
-        "description": "...",
-        "assets": ["..."],
-        "attack_surface": ["..."]
-    }
-}
-```
-
-## 📞 Support
-
-For issues or questions:
-1. Check troubleshooting section above
-2. Verify all dependencies are installed
-3. Ensure Ollama is running (for AI demos)
-4. Check Streamlit documentation: https://docs.streamlit.io
-
-## 📄 License
-
-Educational use only. Part of SecureAI course materials.
 
 ## 🎓 Course Information
 
-**Course:** SecureAI: Threat Model & Test Endpoints  
-**Instructor:** Ritesh Vajariya  
-**Platform:** Coursera  
+**Course:** SecureAI: Threat Model & Test Endpoints
+**Instructor:** Ritesh Vajariya
+**Platform:** Coursera
+
+## 🤝 Getting Help
+
+If you run into issues:
+
+1. Check the **Troubleshooting** section above
+2. Review the course discussion forums
+3. Verify all prerequisites are installed correctly
+4. Make sure Ollama is running for AI demos
+5. Check that all Python dependencies are installed
+
+## 📚 Additional Resources
+
+- [Streamlit Documentation](https://docs.streamlit.io)
+- [Ollama Documentation](https://github.com/ollama/ollama)
+- [MITRE ATLAS](https://atlas.mitre.org/)
+- [OWASP Top 10 for LLMs](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
 
 ---
 
-**Last Updated:** November 2025  
-**Version:** 1.0
+**Happy Learning! 🚀**
+
+Start with `streamlit run m1-v2-1.py` and explore AI security!
